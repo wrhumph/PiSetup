@@ -43,7 +43,7 @@ network={
 }
 ```
 
-The interfaces file sets up your WiFi with a static IP at 10.1.10.29. Change this address to correspond to your wifi network.  The wpa_supplicant.conf file identifies your wifi network SSID and passphrase.<br>Once you have edited these files, reboot your PI.  When it comes back up you should be able to ping it from your desktop.  Next try pinging google.com from the PI.  Once you have access to the internet you can start installing components.
+The *interfaces* file sets up your WiFi with a static IP at 10.1.10.29. Change this address to correspond to your wifi network.  The *wpa_supplicant.conf* file identifies your wifi network SSID and passphrase.<br>Once you have edited these files, reboot your PI.  When it comes back up you should be able to ping it from your desktop.  Next try pinging google.com from the PI.  Once you have access to the internet you can start installing components.
 ####Install TightVNC
 Use apt-get to install TightVNC.
 ```
