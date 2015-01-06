@@ -95,4 +95,5 @@ Using pi-blaster, you can turn GPIO pin 17 on, for example, with the following c
 echo "17=1" > /dev/pi-blaster
 ```
 
-That's it.
+##Resources
+Another Node library for GPIO: [buzzer](https://www.npmjs.com/package/onoff)
