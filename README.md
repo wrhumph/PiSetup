@@ -8,59 +8,91 @@ Setup Steps
 ####Set up your wifi network
 View the example network configuration files in this project.
 
-/etc/network/interfaces
-/etc/wpa_supplicant/wpa_supplicant.conf.
+#####/etc/network/interfaces
+```
+auto lo
+
+iface lo inet loopback
+iface eth0 inet dhcp
+
+allow-hotplug wlan0
+auto wlan0
+
+
+iface wlan0 inet static 
+address 10.1.10.29
+netmask 255.255.255.0
+gateway 10.1.10.1
+wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+iface default inet dhcp
+```
+
+#####/etc/wpa_supplicant/wpa_supplicant.conf.
+```
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+	ssid="YOURSSID"
+	psk="yourpassphrase"
+	proto=RSN
+	key_mgmt=WPA-PSK
+	pairwise=CCMP
+	auth_alg=OPEN
+}
+```
 
 The interfaces file sets up your WiFi with a static IP at 10.1.10.29. Change this address to correspond to your wifi network.  The wpa_supplicant.conf file identifies your wifi network SSID and passphrase.<br>Once you have edited these files, reboot your PI.  When it comes back up you should be able to ping it from your desktop.  Next try pinging google.com from the PI.  Once you have access to the internet you can start installing components.
 ####Install TightVNC
 Use apt-get to install TightVNC.
 ```
-    sudo apt-get install tightvncserver
+sudo apt-get install tightvncserver
 ```
 Once it is installed, start it up.
 ```
-    tightvncserver
+tightvncserver
 ```
 The first time the VNC Server runs it will ask you for a general password and an optional view-only password.
 ####Start the VNC server.
 ```
-    vncserver :0 -geometry 1920x1080 -depth 24
+vncserver :0 -geometry 1920x1080 -depth 24
 ```
 At this point you should be able to connect to you PI from a VNC client on your desktop.  I use Jump Desktop on my Macs, but there are plenty of free VNC clients for all platforms.
 ####Get the files from this repository
 ```
-    git clone https://github.com/wrhumph/PiSetup.git
+git clone https://github.com/wrhumph/PiSetup.git
 ```
 This copies the files from this Github repositor into a directory named PiSetup under the current directory.  I am assuming you installed it under your home directory in the examples that follow.
 ####Set up the vnc server boot file
 Copy ~/PiSetup/etc/init.d/vncbot into /etc/init.d.  This will run the VNC server at startup.
 ```
-    sudo cp ~/PiSetup/etc/init.d/vncboot /etc/init.d
+sudo cp ~/PiSetup/etc/init.d/vncboot /etc/init.d
 ```
 ####Install NodeJS
 ```
-    wget http://node-arm.herokuapp.com/node_latest_armhf.deb
-    sudo dpkg -i node_latest_armhf.deb
+wget http://node-arm.herokuapp.com/node_latest_armhf.deb
+sudo dpkg -i node_latest_armhf.deb
 ```
 You can test it from the command line and initialize the node package manager.
 ```
-    node -v
-    npm install
+node -v
+npm install
 ```
 ####Install pi-blaster
 Pi-blaster is a device driver that lets you control the PI GPIO by writing to /dev/pi-blaster.
 ```
-    git clone https://github.com/sarfata/pi-blaster.git
-    cd pi-blaster
-    sudo apt-get install autoconf
-    ./autogen.sh
-    ./configure
-    make
-    sudo make install
+git clone https://github.com/sarfata/pi-blaster.git
+cd pi-blaster
+sudo apt-get install autoconf
+./autogen.sh
+./configure
+make
+sudo make install
 ```
 Using pi-blaster, you can turn GPIO pin 17 on, for example, with the following command.
 ```
-    echo "17=1" > /dev/pi-blaster
+echo "17=1" > /dev/pi-blaster
 ```
 
 That's it.
