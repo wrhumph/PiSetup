@@ -1,0 +1,92 @@
+#!/usr/bin/perl
+
+use strict;
+use Cwd;
+
+my $DryRun = 1;
+
+sub banner
+{
+    my $text = shift;
+    print "############################################################\n";
+    print "#\n";
+    print "# $text\n";
+    print "#\n";
+    print "############################################################\n";
+}
+
+sub run {
+    my $cmd = shift;
+    banner("Run: $cmd");
+    system($cmd) unless $DryRun;
+}
+
+sub show_usage {
+    my $args = shift;
+    print STDERR "Use: setup $args\n";
+}
+
+sub sudo {
+    my $cmd = shift;
+    run("sudo " . $cmd);
+}
+
+main:
+{
+    my $i;
+    my $cwd = getcwd();
+    my $cmd;
+    my $cmdline = "[-dry] [network|vnc|node|pi-blaster|help\n"
+                . "    -dry    will show commands without actually running them\n";
+
+    for ($i = 0;  $i < scalar(@ARGV);  $i++) {
+        my $arg = $ARGV[$i];
+        if ($arg eq '-dry') {
+            $DryRun = 1;
+            next;
+        }
+        $cmd = $arg;
+    }
+   
+    if (!defined($cmd)) {
+        show_usage($cmdline);
+    }
+    elsif ($cmd eq 'help') {
+        show_usage($cmdline);
+    }
+    elsif ($cmd eq 'network') {
+        if (! -e "/etc/network/interfaces.save") {
+            sudo("cp /etc/network/interfaces /etc/network/interfaces.save");
+        }
+        sudo("cp ./etc/network/interfaces /etc/network");
+        
+        if (! -e "/etc/wpa_supplicant/wpa_supplicant.save") {
+            sudo("cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.save");
+        }
+        sudo("cp ./etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant");
+    }
+    elsif ($cmd eq 'vnc') {
+        sudo('cp ./etc/init.d/vncboot /etc/init.d');
+        sudo('chmod 755 /etc/init.d/vncboot');
+        sudo('update-rc.d vncboot defaults');
+    }
+    elsif ($cmd eq 'node') {
+        run('wget http://node-arm.herokuapp.com/node_latest_armhf.deb');
+        sudo('dpkg -i node_latest_armhf.deb');
+    }
+    elsif ($cmd eq 'pi-blaster') {
+        run('git clone https://github.com/sarfata/pi-blaster.git');
+        chdir('pi-blaster');
+        sudo('apt-get install autoconf');
+        run('./autogen.sh');
+        run('./configure');
+        run('make');
+        sudo('make install');
+        chdir('..');
+    }
+    else {
+        print STDERR "I didn't recognize that command: $cmd\n";
+        show_usage($cmdline);
+    }
+    0;
+}
