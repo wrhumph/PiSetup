@@ -63,21 +63,37 @@ At this point you should be able to connect to you PI from a VNC client on your 
 ```
 git clone https://github.com/wrhumph/PiSetup.git
 ```
-This copies the files from this Github repositor into a directory named PiSetup under the current directory.  I am assuming you installed it under your home directory in the examples that follow.
+This copies the files from this Github repository into a directory named PiSetup under the current directory.  I am assuming you installed it under your home directory in the examples that follow.  
+In the PiSetup directory you will find a script file named "setup".  To use it, you need to make it executable.
+```
+cd ~/PiSetup
+chmod a+x setup
+```
+This script will automate the steps below.  In each, I show the setup command to use as well as the various commands that the setup script will run for you, in case you want to go through the installations step-by-step.
 ####Set up the vnc server boot file
-Copy ~/PiSetup/etc/init.d/vncbot into /etc/init.d.  This will run the VNC server at startup.
+Do the following to configure the system to start the VNC server at startup.  
 ```
 sudo cp ~/PiSetup/etc/init.d/vncboot /etc/init.d
+sudo chmod 755 /etc/init.d/vncboot
+sudo update-rc.d vncboot defaults
 ```
+Or do it with the setup script.
+```
+./setup vnc
+```
+Reboot.  You will see a message during boot up that the VNC server is starting. should be able to connect from your VNC client.
 ####Install NodeJS
 ```
 wget http://node-arm.herokuapp.com/node_latest_armhf.deb
 sudo dpkg -i node_latest_armhf.deb
 ```
-You can test it from the command line and initialize the node package manager.
+Or do it with the setup script.
+```
+./setup node
+```
+You can test NodeJs from the command line as follows.
 ```
 node -v
-npm install
 ```
 ####Install pi-blaster
 Pi-blaster is a device driver that lets you control the PI GPIO by writing to /dev/pi-blaster.
@@ -89,6 +105,10 @@ sudo apt-get install autoconf
 ./configure
 make
 sudo make install
+```
+Or do it with the setup script.
+```
+./setup pi-baster
 ```
 Using pi-blaster, you can turn GPIO pin 17 on, for example, with the following command.
 ```
