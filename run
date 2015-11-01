@@ -1,0 +1,102 @@
+#!/usr/bin/perl
+
+use strict;
+use Cwd;
+
+my @DIRS;
+my $DryRun = 0;
+
+sub banner
+{
+    my $text = shift;
+    print "##################################################################\n";
+    print "#\n";
+    my @lines = split("\n", $text);
+    foreach my $line(@lines) {
+        print "# $line\n";
+    }
+    print "#\n";
+    print "##################################################################\n";
+}
+
+
+sub show_usage
+{
+    print stderr "Use: run rpm|version|memory|partitions|restart|halt|nop\n";
+}
+
+sub run {
+    my $cmd = shift;
+    banner("Run: $cmd");
+    system($cmd) unless $DryRun;
+}
+
+sub pushd
+{
+    my $dir = shift;
+    my $current = getcwd;
+    print "Pushing $dir - current directory is $current\n";
+    push(@DIRS, $current);
+    chdir $dir;
+}
+
+sub popd
+{
+    if (scalar(@DIRS) > 0) {
+        my $dir = pop(@DIRS);
+        print "Pop to $dir\n";
+        chdir $dir;
+    }
+    else {
+        print "Directory stack is empty\n";
+    }
+}
+
+sub runcmd
+{
+    my $cmd = shift;
+    if ($cmd eq 'rpm') {
+        pushd("../NodeJS/TSARPM");
+        run("node app.js");
+        popd();
+    }
+    elsif ($cmd eq 'version') {
+        run("cat /proc/version");
+    }
+    elsif ($cmd eq 'memory') {
+        run("cat /proc/meminfo");
+    }
+    elsif ($cmd eq 'partitions') {
+        run("cat /proc/partitions");
+    }
+    elsif ($cmd eq 'restart') {
+        run("sudo shutdown -r now");
+    }
+    elsif ($cmd eq 'halt') {
+        run("sudo shutdown -h now");
+    }
+    elsif ($cmd eq 'nop') {
+        print "NOP\n";
+    }
+    else {
+        print "Unrecognized command: $cmd\n";
+        show_usage();
+        exit(1);
+    }
+}
+
+
+main:
+    my $cmd;
+    my $i;
+
+    if (scalar(@ARGV) == 0) {
+        show_usage();
+        exit 0;
+    }
+
+    for ($i = 0;  $i < scalar(@ARGV);  $i++) {
+        my $arg = $ARGV[$i];
+        runcmd($arg);
+    }
+0;
